@@ -1,0 +1,2812 @@
+:: StoryTitle
+Cybersecurity
+
+
+:: StoryData
+{
+  "ifid": "7C4A178B-6B03-4D54-8B82-15377DC548EC",
+  "format": "SugarCube",
+  "format-version": "2.37.3",
+  "start": "Start",
+  "zoom": 1
+}
+
+
+:: 10 {"position":"375,1325","size":"100,100"}
+<div id="terminal-container">
+  <div id="terminal-output"></div>
+
+  <div id="attack-section" style="display: none; margin-top: 10px;">
+    <button id="brute-btn">Play!</button>
+  </div>
+</div>
+
+<style>
+#terminal-container {
+  background-color: black;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 20px;
+  border: 2px solid #00ff00;
+  width: 90%;
+  max-width: 700px;
+  margin: 40px auto;
+  border-radius: 10px;
+  min-height: 250px;
+}
+
+#terminal-output {
+  white-space: pre-wrap;
+  font-size: 1.1em;
+  min-height: 80px;
+}
+
+#attack-section button {
+  background: black;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+#attack-section button:hover {
+  background: #00ff00;
+  color: black;
+}
+</style>
+
+<<script>>
+window.setTimeout(() => {
+  const output = document.getElementById("terminal-output");
+  const attackSection = document.getElementById("attack-section");
+  const bruteBtn = document.getElementById("brute-btn");
+
+  if (!output) return;
+
+  function typeText(text, speed = 40) {
+    return new Promise((resolve) => {
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          output.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        } else {
+          resolve();
+        }
+      }
+      type();
+    });
+  }
+
+  async function showIntro() {
+    output.textContent = "";
+    await typeText("Awesome job! Hopefully you learned some stuff about cyber security!");
+    attackSection.style.display = "block";
+  }
+
+  showIntro();
+
+  bruteBtn.addEventListener("click", () => {
+    Engine.play("11"); // ← Send user to passage "11"
+  });
+}, 100);
+<</script>>
+
+
+:: 11 {"position":"375,1450","size":"100,100"}
+<div id="terminal-container">
+  <div id="terminal-output">
+    <p>Thanks for your help!</p>
+    <p>Here you go!</p>
+
+    <ul>
+    * <<link "🧩 Try the Backdoor Maze">><<goto "11a">><</link>>
+* <<link "🧠 Try the Brute Force Calculator">><<goto "11b">><</link>>
+
+    </ul>
+  </div>
+</div>
+
+<style>
+#terminal-container {
+  background-color: black;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 20px;
+  border: 2px solid #00ff00;
+  width: 90%;
+  max-width: 700px;
+  margin: 40px auto;
+  border-radius: 10px;
+  min-height: 250px;
+}
+#terminal-output ul {
+  list-style-type: none;
+  padding: 0;
+}
+#terminal-output li {
+  margin: 10px 0;
+}
+#terminal-output a {
+  color: #00ff00;
+  text-decoration: underline;
+  cursor: pointer;
+}
+#terminal-output a:hover {
+  color: black;
+  background-color: #00ff00;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+</style>
+
+
+:: 11a {"position":"200,1575","size":"100,100"}
+<p style="color: lime; font-family: monospace; text-align: center; margin-bottom: 10px;">
+  The hacker left a back door! Let's see if we can find something out.... (Use W A S D)
+</p>
+ *<<link "Back">><<goto "11">><</link>>
+
+<div id="terminal-output" class="terminal" style="
+  background-color: black; 
+  color: lime; 
+  padding: 1em; 
+  font-family: monospace; 
+  white-space: pre; 
+  height: 600px; 
+  overflow-y: auto; 
+  border-radius: 10px; 
+  border: 2px solid lime;
+  line-height: 1; 
+  letter-spacing: 0.1em;
+"></div>
+
+
+
+
+<<nobr>><<script>>
+(function () {
+  const size = 35;
+  let maze = [];
+  let pos = { x: 1, y: 1 };
+  let handlerActive = false;
+
+  function generateMaze() {
+    maze = [];
+    for (let y = 0; y < size; y++) {
+      maze[y] = [];
+      for (let x = 0; x < size; x++) {
+        if (y === 0 || y === size - 1 || x === 0 || x === size - 1) {
+          maze[y][x] = "#";
+        } else {
+          maze[y][x] = " ";
+        }
+      }
+    }
+
+    for (let i = 0; i < 300; i++) {
+      const rx = Math.floor(Math.random() * (size - 2)) + 1;
+      const ry = Math.floor(Math.random() * (size - 2)) + 1;
+      maze[ry][rx] = "#";
+    }
+
+    const clearCoords = [
+      [1, 1], [1, 2], [2, 1], [2, 2]
+    ];
+    for (let i = 0; i < clearCoords.length; i++) {
+      const y = clearCoords[i][0];
+      const x = clearCoords[i][1];
+      maze[y][x] = " ";
+    }
+
+    maze[size - 2][size - 2] = "X";
+    pos = { x: 1, y: 1 };
+  }
+
+  function renderMaze() {
+    const rendered = maze.map((row, y) =>
+      row.map((cell, x) => {
+        if (x === pos.x && y === pos.y) return "0";
+        if (cell === "#") return "█";
+        if (cell === " ") return "·";
+        if (cell === "X") return "X";
+        return cell;
+      }).join("")
+    ).join("\n");
+
+    const terminal = document.getElementById("terminal-output");
+    if (terminal) {
+      terminal.textContent = rendered;
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+  }
+
+  function move(dx, dy) {
+    const newX = pos.x + dx;
+    const newY = pos.y + dy;
+
+    if (
+      newY >= 0 && newY < size &&
+      newX >= 0 && newX < size &&
+      maze[newY][newX] !== "#"
+    ) {
+      pos.x = newX;
+      pos.y = newY;
+
+      if (maze[newY][newX] === "X") {
+        const terminal = document.getElementById("terminal-output");
+        if (terminal) {
+          terminal.textContent += "\n\n✅ You made it through the backdoor!";
+        }
+        document.removeEventListener("keydown", handler);
+        handlerActive = false;
+
+        const replayBtn = document.createElement("button");
+        replayBtn.textContent = "Play Again";
+        replayBtn.style = "display: block; margin: 10px auto; font-family: monospace; background: black; color: lime; border: 1px solid lime; padding: 6px 12px;";
+        replayBtn.onclick = () => {
+          replayBtn.remove();
+          generateMaze();
+          renderMaze();
+          if (!handlerActive) {
+            document.addEventListener("keydown", handler);
+            handlerActive = true;
+          }
+        };
+        terminal.parentNode.appendChild(replayBtn);
+        return;
+      }
+    }
+
+    renderMaze();
+  }
+
+  function handler(e) {
+    const key = e.key.toLowerCase();
+    if (key === "arrowup" || key === "w") move(0, -1);
+    else if (key === "arrowdown" || key === "s") move(0, 1);
+    else if (key === "arrowleft" || key === "a") move(-1, 0);
+    else if (key === "arrowright" || key === "d") move(1, 0);
+  }
+
+  generateMaze();
+  renderMaze();
+  if (!handlerActive) {
+    document.addEventListener("keydown", handler);
+    handlerActive = true;
+  }
+})();
+<</script>><</nobr>>
+
+
+:: 11b {"position":"550,1550","size":"100,100"}
+<p style="color: lime; font-family: monospace; text-align: center; margin-bottom: 10px;">
+  How strong is your password? Let's find out how long a brute force attack might take...
+</p>
+
+<div style="text-align: center; margin-bottom: 10px;">
+  <input id="passwordInput" type="text" placeholder="Enter password" style="padding: 8px; font-family: monospace; width: 250px;">
+  <button id="estimateBtn" style="margin-left: 10px; padding: 8px 12px; font-family: monospace; background: black; color: lime; border: 1px solid lime;">Estimate</button>
+</div>
+
+<div id="resultOutput" style="color: lime; font-family: monospace; white-space: pre-wrap; text-align: center; margin-top: 20px;"></div>
+
+ *<<link "Back">><<goto "11">><</link>>
+
+<<script>>
+$(document).ready(function () {
+  function estimateTime(password) {
+    let charsetSize = 0;
+    if (/[a-z]/.test(password)) charsetSize += 26;
+    if (/[A-Z]/.test(password)) charsetSize += 26;
+    if (/[0-9]/.test(password)) charsetSize += 10;
+    if (/[^a-zA-Z0-9]/.test(password)) charsetSize += 32;
+
+    const totalCombos = BigInt(charsetSize) ** BigInt(password.length);
+    const guessesPerSecond = 10_000_000_000n;
+    const seconds = totalCombos / guessesPerSecond;
+
+    return formatTime(seconds);
+  }
+
+  function formatTime(secondsBigInt) {
+    const seconds = Number(secondsBigInt);
+    if (seconds < 1) return "less than 1 second";
+    if (seconds < 60) return `${Math.floor(seconds)} seconds`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours`;
+    if (seconds < 31536000) return `${Math.floor(seconds / 86400)} days`;
+    if (seconds < 3153600000) return `${(seconds / 31536000).toFixed(1)} years`;
+    return `${(seconds / 31536000).toFixed(0)} years`;
+  }
+
+  // New function to decide color based on estimated time string
+  function getColorFromTime(timeString) {
+    if (timeString.includes("less than 1 second") || timeString.includes("seconds")) return "red";
+    if (timeString.includes("minutes")) return "orange";
+    if (timeString.includes("hours")) return "yellow";
+    if (timeString.includes("days")) return "lightgreen";
+    return "lime"; // years or very strong
+  }
+
+  $("#estimateBtn").click(() => {
+    const pw = $("#passwordInput").val();
+    const result = $("#resultOutput");
+
+    if (pw.length === 0) {
+      result.text("Please enter a password.");
+      result.css("color", "lime");
+      return;
+    }
+
+    const timeEstimate = estimateTime(pw);
+    result.text(`Estimated brute-force time:\n${timeEstimate}`);
+    result.css("color", getColorFromTime(timeEstimate));
+  });
+});
+<</script>>
+
+
+:: 3 {"position":"1150,300","size":"100,100"}
+<div id="terminal-container">
+  <div id="terminal-output"></div>
+  <div id="terminal-question" style="display: none;">
+    <p>How do you think the hacker got our password?</p>
+    <ul>
+      <li><button class="choice-btn" data-answer="A">The whole internet is bad!</button></li>
+      <li><button class="choice-btn" data-answer="B">Our password wasn't hidden when we typed it in</button></li>
+      <li><button class="choice-btn" data-answer="C">There was a virus in our web address</button></li>
+    </ul>
+    <p id="feedback" style="margin-top: 10px;"></p>
+  </div>
+</div>
+
+<style>
+#terminal-container {
+  background-color: black;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 20px;
+  border: 2px solid #00ff00;
+  width: 90%;
+  max-width: 700px;
+  margin: 40px auto;
+  border-radius: 10px;
+  min-height: 200px;
+}
+
+#terminal-output {
+  white-space: pre-wrap;
+  font-size: 1.1em;
+  min-height: 80px;
+  margin-bottom: 20px;
+}
+
+button.choice-btn {
+  background: black;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 6px 12px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+button.choice-btn:hover {
+  background: #00ff00;
+  color: black;
+}
+</style>
+
+<<script>>
+window.setTimeout(() => {
+  const output = document.getElementById("terminal-output");
+  if (!output) return; // extra safety check
+
+  const text = "It looks like we got HACKED! I wonder how they got our password...";
+  let i = 0;
+
+  function typeText() {
+    if (i < text.length) {
+      output.textContent += text.charAt(i);
+      i++;
+      setTimeout(typeText, 40);
+    } else {
+      $("#terminal-question").fadeIn(400);
+    }
+  }
+
+  typeText();
+
+  $(document).on("click", ".choice-btn", function () {
+    const answer = $(this).data("answer");
+    const feedback = $("#feedback");
+
+    if (answer === "B") {
+      feedback.html("✅ You're right! We need to be more cyber secure. Your instructor will teach you cybersecurity and how we can get our password back! (Press 'SHIFT' + 'P' to Continue)");
+    } else if (answer ==="C") {
+      feedback.html("❌Viruses are usually files on our computer...  ");
+    }
+    else{
+     feedback.html("❌The WHOLE internet getting hacked is very unlikely... ");
+    }
+  });
+  
+  document.addEventListener("keydown", function (event) {
+  if (event.shiftKey && event.key.toLowerCase() === "p") {
+    Engine.play("4"); // 🔁 Replace with the actual name of your next Twine passage
+  }
+});
+
+}, 100); // Delay to ensure the DOM is loaded
+<</script>>
+
+
+:: 4 {"position":"1000,300","size":"100,100"}
+<div id="terminal-container">
+  <div id="terminal-output"></div>
+  <div id="attack-section" style="display: none; margin-top: 10px;">
+    <button id="brute-btn">Try Brute Force Attack</button>
+  </div>
+  <div id="eta-popup" style="display: none;">ETA: 5 billion years</div>
+  <div id="matrix-scroll" style="display: none;"></div>
+</div>
+
+<style>
+#terminal-container {
+  background-color: black;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 20px;
+  border: 2px solid #00ff00;
+  width: 90%;
+  max-width: 700px;
+  margin: 40px auto;
+  border-radius: 10px;
+  min-height: 250px;
+}
+
+#terminal-output {
+  white-space: pre-wrap;
+  font-size: 1.1em;
+  min-height: 80px;
+}
+
+#attack-section button {
+  background: black;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+#attack-section button:hover {
+  background: #00ff00;
+  color: black;
+}
+
+#eta-popup {
+  color: red;
+  font-weight: bold;
+  font-size: 1.2em;
+  text-align: center;
+  margin-top: 15px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+#matrix-scroll {
+  font-family: "Courier New", monospace;
+  color: #00ff00;
+  margin-top: 10px;
+  font-size: 1em;
+  line-height: 1.2em;
+  height: 100px;
+  overflow: hidden;
+}
+</style>
+
+<<script>>
+window.setTimeout(() => {
+  const output = document.getElementById("terminal-output");
+  const attackSection = document.getElementById("attack-section");
+  const bruteBtn = document.getElementById("brute-btn");
+  const etaPopup = document.getElementById("eta-popup");
+  const matrixScroll = document.getElementById("matrix-scroll");
+
+  if (!output) return;
+
+  function typeText(text, speed = 40) {
+    return new Promise((resolve) => {
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          output.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        } else {
+          resolve();
+        }
+      }
+      type();
+    });
+  }
+
+  // Fake password generator
+  function generateFakePassword() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let pass = '';
+    for (let i = 0; i < 6; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pass;
+  }
+
+  // Start fake matrix scroll animation
+  function startMatrixScroll(duration = 3000) {
+    matrixScroll.style.display = "block";
+    let interval = setInterval(() => {
+      const line = generateFakePassword();
+      matrixScroll.innerHTML = `<div>${line}</div>` + matrixScroll.innerHTML;
+      if (matrixScroll.childElementCount > 7) {
+        matrixScroll.removeChild(matrixScroll.lastChild);
+      }
+    }, 100);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      matrixScroll.style.display = "none";
+    }, duration);
+  }
+
+  // Intro typing
+  output.textContent = "";
+  typeText("Let's try hacking the hacker!").then(() => {
+    attackSection.style.display = "block";
+  });
+
+  // Brute force attack button
+  bruteBtn.addEventListener("click", async () => {
+    bruteBtn.disabled = true;
+    etaPopup.style.display = "block";
+    startMatrixScroll(1000000); // show password cycling for 3 sec
+
+    await new Promise(resolve => setTimeout(resolve, 3500)); // wait slightly longer
+    etaPopup.style.display = "none";
+
+    await typeText("\n\nThis brute force attack will take too long...");
+    output.textContent += "\n\n";
+    await typeText("There's too many characters to search! Let's see if we can use our cyber security knowledge to make it faster! (Press 'SHIFT' + 'U' to continue)");
+  });
+
+  // Secret shortcut
+  document.addEventListener("keydown", function (event) {
+    if (event.shiftKey && event.key.toLowerCase() === "u") {
+      Engine.play("5"); // Replace with actual passage name
+    }
+  });
+}, 100);
+<</script>>
+
+
+:: 5 {"position":"850,275","size":"100,100"}
+<p style="color: lime; font-family: monospace; text-align: center; margin-bottom: 10px;">
+  The hacker left a back door! Let's see if we can find something out.... (Press W)
+</p>
+
+<div id="terminal-output" class="terminal" style="
+  background-color: black; 
+  color: lime; 
+  padding: 1em; 
+  font-family: monospace; 
+  white-space: pre; 
+  height: 600px; 
+  overflow-y: auto; 
+  border-radius: 10px; 
+  border: 2px solid lime;
+  line-height: 1; 
+  letter-spacing: 0.1em;
+"></div>
+
+<<script>>
+(function () {
+  const size = 35;
+  const maze = [];
+
+  // Create empty maze with outer walls
+  for (let y = 0; y < size; y++) {
+    maze[y] = [];
+    for (let x = 0; x < size; x++) {
+      if (y === 0 || y === size - 1 || x === 0 || x === size - 1) {
+        maze[y][x] = "#"; // outer wall
+      } else {
+        maze[y][x] = " "; // open space
+      }
+    }
+  }
+
+  // Add some random internal walls for challenge
+  for (let i = 0; i < 300; i++) {
+    const rx = Math.floor(Math.random() * (size - 2)) + 1;
+    const ry = Math.floor(Math.random() * (size - 2)) + 1;
+    maze[ry][rx] = "#";
+  }
+
+  const clearCoords = [
+    [1, 1], [1, 2], [2, 1], [2, 2]
+  ];
+  clearCoords.forEach(([y, x]) => {
+    maze[y][x] = " ";
+  });
+
+  // Place exit door
+  maze[size - 2][size - 2] = "X";
+
+// Guarantee a clear path from start to exit
+let cx = 1;
+let cy = 1;
+const ex = size - 2;
+const ey = size - 2;
+
+while (cx !== ex || cy !== ey) {
+  maze[cy][cx] = " ";
+
+  if (Math.random() < 0.5) {
+    if (cx < ex) cx++;
+    else if (cx > ex) cx--;
+  } else {
+    if (cy < ey) cy++;
+    else if (cy > ey) cy--;
+  }
+}
+
+// Ensure exit area is clear
+maze[ey][ex] = "X";
+maze[ey - 1][ex] = " ";
+maze[ey][ex - 1] = " ";
+maze[ey - 1][ex - 1] = " ";
+
+
+  let pos = { x: 1, y: 1 };
+
+  function renderMaze() {
+    const rendered = maze.map((row, y) =>
+      row.map((cell, x) => {
+        if (x === pos.x && y === pos.y) return "0"; // Player
+        if (cell === "#") return "█";
+        if (cell === " ") return "·";
+        if (cell === "X") return "X";
+        return cell;
+      }).join("")
+    ).join("\n");
+
+    const terminal = document.getElementById("terminal-output");
+    if (terminal) terminal.textContent = rendered;
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  function move(dx, dy) {
+    const newX = pos.x + dx;
+    const newY = pos.y + dy;
+
+    if (
+      newY >= 0 && newY < size &&
+      newX >= 0 && newX < size &&
+      maze[newY][newX] !== "#"
+    ) {
+      pos.x = newX;
+      pos.y = newY;
+
+      if (maze[newY][newX] === "X") {
+        const terminal = document.getElementById("terminal-output");
+        if (terminal) {
+          terminal.textContent += "\n\n✅ You made it through the firewall!";
+        }
+        document.removeEventListener("keydown", handler);
+
+        setTimeout(() => Engine.play("6"), 3000); // 🔁 Replace with your passage
+      }
+    }
+
+    renderMaze();
+  }
+
+  function handler(e) {
+    const key = e.key.toLowerCase();
+    if (key === "arrowup" || key === "w") move(0, -1);
+    else if (key === "arrowdown" || key === "s") move(0, 1);
+    else if (key === "arrowleft" || key === "a") move(-1, 0);
+    else if (key === "arrowright" || key === "d") move(1, 0);
+  }
+
+  document.addEventListener("keydown", handler);
+  renderMaze();
+})();
+<</script>>
+
+
+:: 6 {"position":"675,275","size":"100,100"}
+<div id="villain-dialogue"></div>
+<div id="unlock-container" style="position: absolute; top: 10px; left: 0; right: 0; text-align: center; z-index: 1000;"></div>
+
+<<script>>
+$(document).one(":passagerender", function () {
+  const messages = [
+    { text: "GRRRRR", glitch: true },
+    { text: "Intruder! Get out!", glitch: false },
+    { text: `🎩 "You stole your password: ******** and cha....!"`, glitch: true },
+    { text: "This is MY website!", glitch: true },
+    { text: "ERROR 3RROR", glitch: true, isLink: true }
+  ];
+
+  let i = 0;
+
+  function showNextMessage() {
+    if (i >= messages.length) return;
+
+    const msg = messages[i];
+    const el = document.createElement("div");
+
+    // Random position
+    el.style.position = "absolute";
+    el.style.top = `${Math.random() * 70 + 10}%`;
+    el.style.left = `${Math.random() * 70 + 10}%`;
+    el.style.fontSize = "2em";
+    el.style.zIndex = 100;
+    el.className = "villain";
+    el.style.animation = "glitch-fade 0.5s ease-out";
+
+    if (msg.glitch) {
+      el.classList.add("glitch");
+      el.setAttribute("data-text", msg.text);
+    }
+
+    if (msg.text === "MWAHAHAHAHAHAHAHAHAHA") {
+      el.classList.add("typewriter");
+    }
+
+    if (msg.text.includes("Your password is MINE!")) {
+      el.classList.add("fade-scale-in");
+    }
+
+    if (msg.isLink) {
+      el.innerHTML = `[[${msg.text}|BruteForce]]`;
+    } else {
+      el.textContent = msg.text;
+    }
+
+    const container = document.getElementById("villain-dialogue");
+    if (container) container.appendChild(el);
+
+    i++;
+    setTimeout(showNextMessage, 3000);
+  }
+
+  showNextMessage();
+
+  // After 3 minutes, show loading bar at top
+  setTimeout(function () {
+    const container = document.getElementById("unlock-container");
+
+    const barWrapper = document.createElement("div");
+    barWrapper.style.width = "60%";
+    barWrapper.style.height = "25px";
+    barWrapper.style.background = "#222";
+    barWrapper.style.margin = "0 auto";
+    barWrapper.style.borderRadius = "10px";
+    barWrapper.style.overflow = "hidden";
+
+    const bar = document.createElement("div");
+    bar.style.width = "0%";
+    bar.style.height = "100%";
+    bar.style.background = "limegreen";
+    bar.style.transition = "width 3s linear";
+
+    barWrapper.appendChild(bar);
+    container.appendChild(barWrapper);
+
+    // Start loading fill
+    setTimeout(() => {
+      bar.style.width = "100%";
+    }, 100);
+
+    // After loading, show input
+    setTimeout(() => {
+      const inputWrapper = document.createElement("div");
+      inputWrapper.style.marginTop = "10px";
+
+      inputWrapper.innerHTML = `
+        <p style="margin: 10px 0 5px;">Enter 4-digit recovery code: (6352)</p>
+        <input type="text" id="code-input" maxlength="4" style="font-size: 1.2em; padding: 5px;" />
+        <button id="submit-code" style="font-size: 1.2em; padding: 5px;">Unlock</button>
+        <p id="error-msg" style="color: red; margin: 5px;"></p>
+      `;
+      container.appendChild(inputWrapper);
+
+      document.getElementById("submit-code").addEventListener("click", function () {
+        const code = document.getElementById("code-input").value.trim();
+        if (code === "6352") {
+          Engine.play("7"); // Change to your actual passage
+        } else {
+          document.getElementById("error-msg").textContent = "❌ Incorrect code. Try again.";
+        }
+      });
+    }, 3100);
+  }, 10000); // 3 minutes
+});
+<</script>>
+
+
+:: 7 {"position":"525,275","size":"100,100"}
+<div id="terminal-container">
+  <div id="terminal-output"></div>
+  <div id="attack-section" style="display: none; margin-top: 10px;">
+    <button id="brute-btn">Try Brute Force Attack</button>
+  </div>
+  <div id="eta-popup" style="display: none;">ETA: 9 months</div>
+  <div id="matrix-scroll" style="display: none;"></div>
+</div>
+
+<style>
+#terminal-container {
+  background-color: black;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 20px;
+  border: 2px solid #00ff00;
+  width: 90%;
+  max-width: 700px;
+  margin: 40px auto;
+  border-radius: 10px;
+  min-height: 250px;
+}
+
+#terminal-output {
+  white-space: pre-wrap;
+  font-size: 1.1em;
+  min-height: 80px;
+}
+
+#attack-section button {
+  background: black;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+#attack-section button:hover {
+  background: #00ff00;
+  color: black;
+}
+
+#eta-popup {
+  color: red;
+  font-weight: bold;
+  font-size: 1.2em;
+  text-align: center;
+  margin-top: 15px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+#matrix-scroll {
+  font-family: "Courier New", monospace;
+  color: #00ff00;
+  margin-top: 10px;
+  font-size: 1em;
+  line-height: 1.2em;
+  height: 100px;
+  overflow: hidden;
+}
+</style>
+
+<<script>>
+window.setTimeout(() => {
+  const output = document.getElementById("terminal-output");
+  const attackSection = document.getElementById("attack-section");
+  const bruteBtn = document.getElementById("brute-btn");
+  const etaPopup = document.getElementById("eta-popup");
+  const matrixScroll = document.getElementById("matrix-scroll");
+
+  if (!output) return;
+
+  function typeText(text, speed = 40) {
+    return new Promise((resolve) => {
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          output.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        } else {
+          resolve();
+        }
+      }
+      type();
+    });
+  }
+
+  // Fake password generator
+  function generateFakePassword() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let pass = '';
+    for (let i = 0; i < 6; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pass;
+  }
+
+  // Start fake matrix scroll animation
+  function startMatrixScroll(duration = 3000) {
+    matrixScroll.style.display = "block";
+    let interval = setInterval(() => {
+      const line = generateFakePassword();
+      matrixScroll.innerHTML = `<div>${line}</div>` + matrixScroll.innerHTML;
+      if (matrixScroll.childElementCount > 7) {
+        matrixScroll.removeChild(matrixScroll.lastChild);
+      }
+    }, 100);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      matrixScroll.style.display = "none";
+    }, duration);
+  }
+
+  // Intro typing
+  output.textContent = "";
+  typeText("Good work! We got the hackers password length (8 characters). Let's try again.").then(() => {
+    attackSection.style.display = "block";
+  });
+
+  // Brute force attack button
+  bruteBtn.addEventListener("click", async () => {
+    bruteBtn.disabled = true;
+    etaPopup.style.display = "block";
+    startMatrixScroll(1000000); // show password cycling for 3 sec
+
+    await new Promise(resolve => setTimeout(resolve, 3500)); // wait slightly longer
+    etaPopup.style.display = "none";
+
+    await typeText("\n\nStill too long! But we're closer!");
+    output.textContent += "\n\n";
+    await typeText("Wait a second, we just got a message... Press shift+e to view the messages.");
+  });
+
+  // Secret shortcut
+  document.addEventListener("keydown", function (event) {
+    if (event.shiftKey && event.key.toLowerCase() === "e") {
+      Engine.play("8"); // Replace with actual passage name
+    }
+  });
+}, 100);
+<</script>>
+
+
+:: 8 {"position":"375,250","size":"100,100"}
+<h2 style="text-align: center; font-family: sans-serif;">🕵️‍♂️ Phishing Detection</h2>
+<p style="font-family: monospace; text-align: center;">
+We have three emails! But I think some are suspicious... can you choose the right one?
+</p>
+
+<div class="email-container">
+
+	<<link "📧 Urgent Account Alert">>
+		<<goto "8a">>
+	<</link>>
+	<div class="email-preview">
+		From: <em>security@micros0ft-support.com</em><br>
+		Subject: Urgent: Your account will be suspended!<br>
+		“Click the link below to verify your information immediately or risk permanent suspension.”
+	</div>
+
+	<<link "📧 Email from Kevin">>
+		<<goto "8b">>
+	<</link>>
+	<div class="email-preview">
+		From: <em>kevin@hotmail.com</em><br>
+		Subject: New Account<br>
+		“Did you get on the new website?"
+        "-Kevin
+	</div>
+
+	<<link "📧 You've Won a Gift Card!">>
+		<<goto "8c">>
+	<</link>>
+	<div class="email-preview">
+		From: <em>free-gift@amaz0n-prizes.info</em><br>
+		Subject: 🎁 You've won a $500 Amazon Gift Card!<br>
+		“Act now! Only 3 cards left! Confirm your delivery address here.”
+	</div>
+
+</div>
+
+<style>
+.email-container {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5em;
+	font-family: monospace;
+}
+
+.link-internal {
+	background: #111;
+	border: 2px solid lime;
+	color: lime;
+	padding: 0.5em 1em;
+	display: inline-block;
+	border-radius: 8px;
+	cursor: pointer;
+	margin-bottom: 0.2em;
+}
+
+.email-preview {
+	background: #000;
+	border: 1px dashed lime;
+	color: lime;
+	padding: 1em;
+	margin-left: 1em;
+	font-size: 0.95em;
+	border-radius: 6px;
+}
+</style>
+
+
+:: 8a {"position":"200,425","size":"100,100"}
+<div style="
+  background-color: black;
+  color: lime;
+  padding: 1em;
+  font-family: monospace;
+  white-space: pre-wrap;
+  border-radius: 10px;
+  border: 2px solid lime;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  max-width: 800px;
+  margin: auto;
+">
+
+❌ ACCESS DENIED
+
+That’s a phishing email!
+It tries to scare you with urgency and uses a fake domain:
+  - "micros0ft-support.com" (notice the zero instead of an 'o').
+
+Be cautious with emails demanding immediate action.
+
+</div>
+
+<<link "Back">><<goto "8">><</link>>
+
+
+:: 8b {"position":"350,400","size":"100,100"}
+<div style="
+  background-color: black;
+  color: lime;
+  padding: 1em;
+  font-family: monospace;
+  white-space: pre-wrap;
+  border-radius: 10px;
+  border: 2px solid lime;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  max-width: 800px;
+  margin: auto;
+">
+
+✅ ACCESS GRANTED
+
+Correct! This email looks legitimate:
+  - No urgency or scare tactics
+  - No suspicious links.
+  - Real domain: "hotmail.com"
+
+Good job!
+
+</div>
+
+   * <<link "Continue">><<goto "Root">><</link>>
+
+
+:: 8c {"position":"475,425","size":"100,100"}
+<div style="
+  background-color: black;
+  color: lime;
+  padding: 1em;
+  font-family: monospace;
+  white-space: pre-wrap;
+  border-radius: 10px;
+  border: 2px solid lime;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  max-width: 800px;
+  margin: auto;
+">
+
+❌ ACCESS DENIED
+
+Nope! This is a classic phishing attempt:
+  - The email promises a prize.
+  - It uses a shady domain: "amaz0n-prizes.info".
+
+Never click suspicious gift links — even if they use a familiar name.
+
+</div>
+
+<<link "Back">><<goto "8">><</link>>
+
+
+:: 9 {"position":"350,1050","size":"100,100"}
+<div id="terminal-container">
+  <div id="terminal-output"></div>
+  <div id="password-entry" style="margin-top: 10px;">
+    <label for="password-input">Put in the characters: ('a', '3', '!', 'o', 'L', '9', '?', 'w')
+DEBUG: The password is a39owL?! Press 'SHIFT' + 'i' to go to the next one </label><br>
+    <input type="text" id="password-input" maxlength="8" style="width: 300px;" />
+  </div>
+  <div id="attack-section" style="display: none; margin-top: 10px;">
+    <button id="brute-btn">Try Brute Force Attack</button>
+  </div>
+  <div id="eta-popup" style="display: none;">ETA: 1 second!</div>
+  <div id="matrix-scroll" style="display: none;"></div>
+</div>
+
+<style>
+#terminal-container {
+  background-color: black;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 20px;
+  border: 2px solid #00ff00;
+  width: 90%;
+  max-width: 700px;
+  margin: 40px auto;
+  border-radius: 10px;
+  min-height: 250px;
+}
+
+#terminal-output {
+  white-space: pre-wrap;
+  font-size: 1.1em;
+  min-height: 80px;
+}
+
+#attack-section button {
+  background: black;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+#attack-section button:hover {
+  background: #00ff00;
+  color: black;
+}
+
+#eta-popup {
+  color: cyan;
+  font-weight: bold;
+  font-size: 1.2em;
+  text-align: center;
+  margin-top: 15px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+#matrix-scroll {
+  font-family: "Courier New", monospace;
+  color: #00ff00;
+  margin-top: 10px;
+  font-size: 1em;
+  line-height: 1.2em;
+  height: 100px;
+  overflow: hidden;
+}
+</style>
+
+<script>
+window.setTimeout(function() {
+  // 🌟 These variables are now LOCAL to this passage only
+  let messageIndex = 0;
+  let messageBuffer = "";
+  let typingTimer;
+
+  const output = document.getElementById("terminal-output");
+  const attackSection = document.getElementById("attack-section");
+  const bruteBtn = document.getElementById("brute-btn");
+  const etaPopup = document.getElementById("eta-popup");
+  const matrixScroll = document.getElementById("matrix-scroll");
+  const passwordInput = document.getElementById("password-input");
+  const passwordEntry = document.getElementById("password-entry");
+
+  const requiredChars = ['a', '3', '!', 'o', 'L', '9', '?', 'w'];
+
+  if (!output) return;
+
+function typeText(text, speed, callback) {
+  if (typingTimer) {
+    clearTimeout(typingTimer);
+    typingTimer = null;
+  }
+
+  let i = 0;
+  output.textContent = "";
+
+  function type() {
+    if (i < text.length) {
+      output.textContent += text.charAt(i);
+      i++;
+      typingTimer = setTimeout(type, speed);
+    } else {
+      typingTimer = null;
+      if (callback) callback();
+    }
+  }
+
+  type();
+}
+
+
+
+
+
+  function generateFakePassword() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let pass = '';
+    for (let i = 0; i < 6; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pass;
+  }
+
+  function startMatrixScroll(duration) {
+    matrixScroll.style.display = "block";
+    let interval = setInterval(function() {
+      const line = generateFakePassword();
+      matrixScroll.innerHTML = `<div>${line}</div>` + matrixScroll.innerHTML;
+      if (matrixScroll.childElementCount > 7) {
+        matrixScroll.removeChild(matrixScroll.lastChild);
+      }
+    }, 100);
+
+    setTimeout(function() {
+      clearInterval(interval);
+      matrixScroll.style.display = "none";
+    }, duration);
+  }
+
+  output.textContent = "";
+  typeText("Nice job detective! We know the length is 8 characters and the hacker's favorite ones! That must be their password!", 40, function() {
+    passwordEntry.style.display = "block";
+  });
+
+  passwordInput.addEventListener("input", function() {
+    const val = passwordInput.value;
+    const chars = val.split('');
+    const uniqueMatch = requiredChars.every(function(ch) {
+      return chars.includes(ch);
+    });
+    const isExactLength = val.length === 8;
+
+    if (isExactLength && uniqueMatch) {
+      attackSection.style.display = "block";
+    } else {
+      attackSection.style.display = "none";
+    }
+  });
+
+  bruteBtn.addEventListener("click", function() {
+    bruteBtn.disabled = true;
+    etaPopup.style.display = "block";
+    startMatrixScroll(1000); // endless
+
+    setTimeout(function() {
+      etaPopup.style.display = "none";
+      typeText("\n\nWow! 1 Second!\nWe did it we got our password back!\n\n Here it is: a39owL?!", 40);
+    }, 1000);
+  });
+
+  document.addEventListener("keydown", function(event) {
+    if (event.shiftKey && event.key.toLowerCase() === "i") {
+      SugarCube.Engine.play("9a"); // Replace with actual passage name
+    }
+  });
+}, 100);
+</script>
+
+
+:: 9a {"position":"375,1200","size":"100,100"}
+<div id="villain-dialogue"></div>
+<div id="unlock-container" style="position: absolute; top: 10px; left: 0; right: 0; text-align: center; z-index: 1000;"></div>
+
+<<script>>
+$(document).one(":passagerender", function () {
+  const messages = [
+    { text: "NOOOO", glitch: true },
+    { text: "CURSES!!!", glitch: true },
+    { text: `I'VE BEEN FOILED!!!!"`, glitch: true },
+    { text: "This is YOUR website!", glitch: true },
+    { text: "ERROR 3RROR", glitch: true, isLink: true }
+  ];
+
+  let i = 0;
+
+  function showNextMessage() {
+    if (i >= messages.length) return;
+
+    const msg = messages[i];
+    const el = document.createElement("div");
+
+    // Random position
+    el.style.position = "absolute";
+    el.style.top = `${Math.random() * 70 + 10}%`;
+    el.style.left = `${Math.random() * 70 + 10}%`;
+    el.style.fontSize = "2em";
+    el.style.zIndex = 100;
+    el.className = "villain";
+    el.style.animation = "glitch-fade 0.5s ease-out";
+
+    if (msg.glitch) {
+      el.classList.add("glitch");
+      el.setAttribute("data-text", msg.text);
+    }
+
+    if (msg.text === "MWAHAHAHAHAHAHAHAHAHA") {
+      el.classList.add("typewriter");
+    }
+
+    if (msg.text.includes("Your password is MINE!")) {
+      el.classList.add("fade-scale-in");
+    }
+
+    if (msg.isLink) {
+      el.innerHTML = `[[${msg.text}|BruteForce]]`;
+    } else {
+      el.textContent = msg.text;
+    }
+
+    const container = document.getElementById("villain-dialogue");
+    if (container) container.appendChild(el);
+
+    i++;
+    setTimeout(showNextMessage, 3000);
+  }
+
+  showNextMessage();
+
+  // After 3 minutes, show loading bar at top
+  setTimeout(function () {
+    const container = document.getElementById("unlock-container");
+
+    const barWrapper = document.createElement("div");
+    barWrapper.style.width = "60%";
+    barWrapper.style.height = "25px";
+    barWrapper.style.background = "#222";
+    barWrapper.style.margin = "0 auto";
+    barWrapper.style.borderRadius = "10px";
+    barWrapper.style.overflow = "hidden";
+
+    const bar = document.createElement("div");
+    bar.style.width = "0%";
+    bar.style.height = "100%";
+    bar.style.background = "limegreen";
+    bar.style.transition = "width 3s linear";
+
+    barWrapper.appendChild(bar);
+    container.appendChild(barWrapper);
+
+    // Start loading fill
+    setTimeout(() => {
+      bar.style.width = "100%";
+    }, 100);
+
+    // After loading, show input
+    setTimeout(() => {
+      const inputWrapper = document.createElement("div");
+      inputWrapper.style.marginTop = "10px";
+
+      inputWrapper.innerHTML = `
+        <p style="margin: 10px 0 5px;">Enter 4-digit recovery code: (3297)</p>
+        <input type="text" id="code-input" maxlength="4" style="font-size: 1.2em; padding: 5px;" />
+        <button id="submit-code" style="font-size: 1.2em; padding: 5px;">Unlock</button>
+        <p id="error-msg" style="color: red; margin: 5px;"></p>
+      `;
+      container.appendChild(inputWrapper);
+
+      document.getElementById("submit-code").addEventListener("click", function () {
+        const code = document.getElementById("code-input").value.trim();
+        if (code === "3297") {
+          Engine.play("10"); // Change to your actual passage
+        } else {
+          document.getElementById("error-msg").textContent = "❌ Incorrect code. Try again.";
+        }
+      });
+    }, 3100);
+  }, 10000); // 3 minutes
+});
+<</script>>
+
+
+:: BruteForce {"position":"975,850","size":"100,100"}
+
+
+
+:: DeletedEmail {"position":"525,925","size":"100,100"}
+<div class="villain">
+To: Mrs. Trustworthy
+Subject: Favorite Characters
+Mine definitley have to be: 'a', '3', '!', 'o', 'L', '9', '?', 'w'.
+In no particular order. 
+<<link "Back">><<goto "Downloads">><</link>>
+</div>
+
+<style>
+  #terminal-container {
+    background-color: black;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    padding: 20px;
+    border: 2px solid #00ff00;
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 10px;
+    min-height: 100px;
+  }
+  
+  #terminal-output {
+    white-space: pre-wrap;
+    font-size: 1.1em;
+    min-height: 80px;
+  }
+  
+  .villain {
+  border-color: #ff0000 !important; /* ensure red border */
+  background-color: #330000;
+  color: #ff4444;
+  font-family: "Courier New", monospace;
+  max-width: 300px;
+  margin: 20px auto;
+  padding: 1em;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Override any inherited border colors on the links or list */
+.villain ul,
+.villain li,
+.villain a {
+  border-color: #ff0000 !important;
+  color: #ff4444 !important;
+  text-decoration: none;
+}
+
+.villain a {
+  color: #ff4444;
+  text-decoration: none;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.villain a:hover {
+  animation: flashRed 1s infinite;
+  color: #fff;
+  background-color: #ff0000;
+  border-radius: 4px;
+}
+
+/* Flash red keyframes */
+@keyframes flashRed {
+  0%, 100% {
+    background-color: #330000;
+    color: #ff4444;
+  }
+  50% {
+    background-color: #ff0000;
+    color: #fff;
+  }
+}
+
+
+
+</style>
+
+<<script>>
+
+
+
+
+/*
+// Secret keyboard shortcut: Shift + Y
+document.addEventListener("keydown", function (e) {
+  if (e.shiftKey && e.key.toLowerCase() === "y") {
+    Engine.play("9");
+  }
+});*/
+
+<</script>>
+
+
+:: Documents {"position":"200,775","size":"100,100"}
+<div id="terminal-container">
+  <div id="terminal-output"></div>
+</div>
+
+<div class="villain" style="background-color: #330000; color: #ff4444; font-family: 'Courier New', monospace; max-width: 300px; margin: 20px auto; padding: 1em; border-radius: 10px; border: 2px solid #ff0000; text-align: center;">
+  <ul style="list-style:none; padding:0; margin:0;">
+    <li><<link "Resume.txt">><<goto "Resume">><</link>></li>
+    <li><<link "Secret.txt">><<goto "Secret">><</link>></li>
+    <li><<link "Back">><<goto "Root">><</link>></li>
+    </ul>
+</div>
+
+<style>
+  #terminal-container {
+    background-color: black;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    padding: 20px;
+    border: 2px solid #00ff00;
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 10px;
+    min-height: 100px;
+  }
+  
+  #terminal-output {
+    white-space: pre-wrap;
+    font-size: 1.1em;
+    min-height: 80px;
+  }
+  
+  .villain {
+  border-color: #ff0000 !important; /* ensure red border */
+  background-color: #330000;
+  color: #ff4444;
+  font-family: "Courier New", monospace;
+  max-width: 300px;
+  margin: 20px auto;
+  padding: 1em;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Override any inherited border colors on the links or list */
+.villain ul,
+.villain li,
+.villain a {
+  border-color: #ff0000 !important;
+  color: #ff4444 !important;
+  text-decoration: none;
+}
+
+.villain a {
+  color: #ff4444;
+  text-decoration: none;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.villain a:hover {
+  animation: flashRed 1s infinite;
+  color: #fff;
+  background-color: #ff0000;
+  border-radius: 4px;
+}
+
+/* Flash red keyframes */
+@keyframes flashRed {
+  0%, 100% {
+    background-color: #330000;
+    color: #ff4444;
+  }
+  50% {
+    background-color: #ff0000;
+    color: #fff;
+  }
+}
+
+
+
+</style>
+
+
+
+<<script>>
+window.setTimeout(() => {
+  const output = document.getElementById("terminal-output");
+  if (!output) return;
+
+  // ✅ Scoped (temporary) variable for this passage
+  let typingIndex = 0;
+  let typingTimer;
+
+  // ✅ Self-contained function
+  function typeText(text, speed = 40) {
+    return new Promise((resolve) => {
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          output.textContent += text.charAt(i);
+          i++;
+          typingTimer = setTimeout(type, speed); // stays local
+        } else {
+          resolve();
+        }
+      }
+      type();
+    });
+  }
+
+  output.textContent = "";
+  typeText("Keep your eyes peeled...");
+}, 100);
+<</script>>
+
+
+:: Downloads {"position":"450,800","size":"100,100"}
+<div class="villain">
+Downloads
+<<link "shopping_list.txt">><<goto "ShoppingList">><</link>>
+<<link "DeletedEmail.doc">><<goto "DeletedEmail">><</link>>
+<<link "Back">><<goto "Documents">><</link>>
+</div>
+
+<style>
+  #terminal-container {
+    background-color: black;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    padding: 20px;
+    border: 2px solid #00ff00;
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 10px;
+    min-height: 100px;
+  }
+  
+  #terminal-output {
+    white-space: pre-wrap;
+    font-size: 1.1em;
+    min-height: 80px;
+  }
+  
+  .villain {
+  border-color: #ff0000 !important; /* ensure red border */
+  background-color: #330000;
+  color: #ff4444;
+  font-family: "Courier New", monospace;
+  max-width: 300px;
+  margin: 20px auto;
+  padding: 1em;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Override any inherited border colors on the links or list */
+.villain ul,
+.villain li,
+.villain a {
+  border-color: #ff0000 !important;
+  color: #ff4444 !important;
+  text-decoration: none;
+}
+
+.villain a {
+  color: #ff4444;
+  text-decoration: none;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.villain a:hover {
+  animation: flashRed 1s infinite;
+  color: #fff;
+  background-color: #ff0000;
+  border-radius: 4px;
+}
+
+/* Flash red keyframes */
+@keyframes flashRed {
+  0%, 100% {
+    background-color: #330000;
+    color: #ff4444;
+  }
+  50% {
+    background-color: #ff0000;
+    color: #fff;
+  }
+}
+
+
+
+</style>
+
+<<script>>
+
+
+/*
+// Secret keyboard shortcut: Shift + Y
+document.addEventListener("keydown", function (e) {
+  if (e.shiftKey && e.key.toLowerCase() === "y") {
+    Engine.play("9");
+
+});*/
+<</script>>
+
+
+:: Resume {"position":"150,900","size":"100,100"}
+<div class="villain">
+Certified bad guy
+Born in 2004
+Graduated Evil College in 2022
+Expert chemist
+Likes dissecting animals
+<<link "Back">><<goto "Documents">><</link>>
+</div>
+
+<style>
+  #terminal-container {
+    background-color: black;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    padding: 20px;
+    border: 2px solid #00ff00;
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 10px;
+    min-height: 100px;
+  }
+  
+  #terminal-output {
+    white-space: pre-wrap;
+    font-size: 1.1em;
+    min-height: 80px;
+  }
+  
+  .villain {
+  border-color: #ff0000 !important; /* ensure red border */
+  background-color: #330000;
+  color: #ff4444;
+  font-family: "Courier New", monospace;
+  max-width: 300px;
+  margin: 20px auto;
+  padding: 1em;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Override any inherited border colors on the links or list */
+.villain ul,
+.villain li,
+.villain a {
+  border-color: #ff0000 !important;
+  color: #ff4444 !important;
+  text-decoration: none;
+}
+
+.villain a {
+  color: #ff4444;
+  text-decoration: none;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.villain a:hover {
+  animation: flashRed 1s infinite;
+  color: #fff;
+  background-color: #ff0000;
+  border-radius: 4px;
+}
+
+/* Flash red keyframes */
+@keyframes flashRed {
+  0%, 100% {
+    background-color: #330000;
+    color: #ff4444;
+  }
+  50% {
+    background-color: #ff0000;
+    color: #fff;
+  }
+}
+
+
+
+</style>
+
+<<script>>
+
+/*
+// Secret keyboard shortcut: Shift + Y
+document.addEventListener("keydown", function (e) {
+  if (e.shiftKey && e.key.toLowerCase() === "y") {
+    Engine.play("9");
+  }
+});*/
+<</script>>
+
+
+:: Root {"position":"325,650","size":"100,100"}
+<div id="terminal-container">
+  <div id="terminal-output"></div>
+</div>
+
+<div class="villain" style="background-color: #330000; color: #ff4444; font-family: 'Courier New', monospace; max-width: 300px; margin: 20px auto; padding: 1em; border-radius: 10px; border: 2px solid #ff0000; text-align: center;">
+  <ul style="list-style:none; padding:0; margin:0;">
+    <li><<link "Documents">><<goto "Documents">><</link>></li>
+    <li><<link "Downloads">><<goto "Downloads">><</link>></li>
+  </ul>
+</div>
+
+<style>
+  #terminal-container {
+    background-color: black;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    padding: 20px;
+    border: 2px solid #00ff00;
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 10px;
+    min-height: 100px;
+  }
+  
+  #terminal-output {
+    white-space: pre-wrap;
+    font-size: 1.1em;
+    min-height: 80px;
+  }
+  
+  .villain {
+  border-color: #ff0000 !important; /* ensure red border */
+  background-color: #330000;
+  color: #ff4444;
+  font-family: "Courier New", monospace;
+  max-width: 300px;
+  margin: 20px auto;
+  padding: 1em;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Override any inherited border colors on the links or list */
+.villain ul,
+.villain li,
+.villain a {
+  border-color: #ff0000 !important;
+  color: #ff4444 !important;
+  text-decoration: none;
+}
+
+.villain a {
+  color: #ff4444;
+  text-decoration: none;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.villain a:hover {
+  animation: flashRed 1s infinite;
+  color: #fff;
+  background-color: #ff0000;
+  border-radius: 4px;
+}
+
+/* Flash red keyframes */
+@keyframes flashRed {
+  0%, 100% {
+    background-color: #330000;
+    color: #ff4444;
+  }
+  50% {
+    background-color: #ff0000;
+    color: #fff;
+  }
+}
+
+
+
+</style>
+
+<<script>>
+window.setTimeout(() => {
+  const output = document.getElementById("terminal-output");
+  if (!output) return;
+
+  function typeText(text, speed = 40) {
+    return new Promise((resolve) => {
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          output.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        } else {
+          resolve();
+        }
+      }
+      type();
+    });
+  }
+
+  output.textContent = "";
+  typeText("We got into the hackers computer through the backdoor! There must be a hint somewhere in here..... (Press 'SHIFT' + 'Y' once you've found the hint)");
+}, 100);
+
+// Secret keyboard shortcut: Shift + Y
+document.addEventListener("keydown", function (e) {
+  if (e.shiftKey && e.key.toLowerCase() === "y") {
+    Engine.play("9");
+  }
+});
+
+
+<</script>>
+
+
+:: Secret {"position":"0,875","size":"100,100"}
+<div class="villain">
+gah I spilled mountain dew on my keyboard. Yuck!
+<<link "Back">><<goto "Documents">><</link>>
+</div>
+
+<style>
+  #terminal-container {
+    background-color: black;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    padding: 20px;
+    border: 2px solid #00ff00;
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 10px;
+    min-height: 100px;
+  }
+  
+  #terminal-output {
+    white-space: pre-wrap;
+    font-size: 1.1em;
+    min-height: 80px;
+  }
+  
+  .villain {
+  border-color: #ff0000 !important; /* ensure red border */
+  background-color: #330000;
+  color: #ff4444;
+  font-family: "Courier New", monospace;
+  max-width: 300px;
+  margin: 20px auto;
+  padding: 1em;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Override any inherited border colors on the links or list */
+.villain ul,
+.villain li,
+.villain a {
+  border-color: #ff0000 !important;
+  color: #ff4444 !important;
+  text-decoration: none;
+}
+
+.villain a {
+  color: #ff4444;
+  text-decoration: none;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.villain a:hover {
+  animation: flashRed 1s infinite;
+  color: #fff;
+  background-color: #ff0000;
+  border-radius: 4px;
+}
+
+/* Flash red keyframes */
+@keyframes flashRed {
+  0%, 100% {
+    background-color: #330000;
+    color: #ff4444;
+  }
+  50% {
+    background-color: #ff0000;
+    color: #fff;
+  }
+}
+
+
+
+</style>
+
+
+<<script>>
+
+/*
+// Secret keyboard shortcut: Shift + Y
+document.addEventListener("keydown", function (e) {
+  if (e.shiftKey && e.key.toLowerCase() === "y") {
+    Engine.play("9");
+  }
+});*/
+<</script>>
+
+
+:: ShoppingList {"position":"625,800","size":"100,100"}
+<div class="villain">
+- Eggs  
+- Milk  
+- Cheese
+-cucumbers
+-MORE CUCUMBERS
+-spaghetti and meatballs!!!!
+<<link "Back">><<goto "Downloads">><</link>>
+</div>
+
+<style>
+  #terminal-container {
+    background-color: black;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    padding: 20px;
+    border: 2px solid #00ff00;
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 10px;
+    min-height: 100px;
+  }
+  
+  #terminal-output {
+    white-space: pre-wrap;
+    font-size: 1.1em;
+    min-height: 80px;
+  }
+  
+  .villain {
+  border-color: #ff0000 !important; /* ensure red border */
+  background-color: #330000;
+  color: #ff4444;
+  font-family: "Courier New", monospace;
+  max-width: 300px;
+  margin: 20px auto;
+  padding: 1em;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Override any inherited border colors on the links or list */
+.villain ul,
+.villain li,
+.villain a {
+  border-color: #ff0000 !important;
+  color: #ff4444 !important;
+  text-decoration: none;
+}
+
+.villain a {
+  color: #ff4444;
+  text-decoration: none;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.villain a:hover {
+  animation: flashRed 1s infinite;
+  color: #fff;
+  background-color: #ff0000;
+  border-radius: 4px;
+}
+
+/* Flash red keyframes */
+@keyframes flashRed {
+  0%, 100% {
+    background-color: #330000;
+    color: #ff4444;
+  }
+  50% {
+    background-color: #ff0000;
+    color: #fff;
+  }
+}
+
+
+
+</style>
+
+<<script>>
+/*
+
+// Secret keyboard shortcut: Shift + Y
+document.addEventListener("keydown", function (e) {
+  if (e.shiftKey && e.key.toLowerCase() === "y") {
+    Engine.play("9");
+  }
+});*/
+<</script>>
+
+
+:: Start {"position":"1000,600","size":"100,100"}
+<style>
+  body {
+    background-color: #f0f0f0 !important;
+    color: #222 !important;
+    font-family: sans-serif !important;
+  }
+
+  .login-container {
+    background: white;
+    padding: 2em;
+    border-radius: 8px;
+    max-width: 400px;
+    margin: 10vh auto;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  }
+
+  .login-container h1 {
+    text-align: center;
+    margin-bottom: 1em;
+  }
+
+  .login-container p {
+    text-align: center;
+    margin-bottom: 1.5em;
+  }
+
+  .login-container label {
+    display: block;
+    margin: 0.5em 0 0.2em;
+    color: #333 !important;
+    font-weight: bold;
+  }
+
+  .login-container input {
+    width: 100%;
+    padding: 0.5em;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+
+  .login-container button {
+    margin-top: 1em;
+    width: 100%;
+    padding: 0.75em;
+    font-size: 1em;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .login-container button:hover {
+    background-color: #004d99;
+  }
+
+.error-flash {
+  display: none;
+  margin-top: 2em;
+  padding: 1.5em;
+  border: 2px solid #f00;
+  background: #ffeeee;
+  color: #a00;
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 1.4em;
+  animation: flicker 0.5s infinite alternate;
+  box-shadow: 0 0 10px #f00, 0 0 20px #f00;
+  text-align: center;
+}
+
+
+  .error-flash::before {
+    content: "⚠ ";
+    color: #f00;
+  }
+
+  @keyframes flicker {
+    0%   { opacity: 0.8; }
+    100% { opacity: 0.3; transform: scale(1.01); }
+  }
+
+  .fade-out {
+    animation: fadeout 1s forwards;
+  }
+
+  @keyframes fadeout {
+    to { opacity: 0; transform: scale(0.98); }
+  }
+</style>
+
+<div id="login-box" class="login-container">
+  <h1><strong>You Shall Not Pass!</strong></h1>
+  <p>A cybersecurity quest</p>
+
+  <label for="username">Username:</label>
+  <input id="username" type="text">
+
+  <label for="password">Password:</label>
+  <input id="password" type="text">
+
+  <div id="errors" class="error-flash">System Error: Unknown Login Protocol</div>
+
+ <<button "Submit">>
+  <<script>>
+  (function(){
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    State.variables.username = username;
+    State.variables.password = password;
+
+    // Show error flash
+    const errorBox = document.getElementById("errors");
+    errorBox.style.display = "block";
+
+    // Fade out login box after short delay
+    const loginBox = document.getElementById("login-box");
+    setTimeout(() => {
+      loginBox.classList.add("fade-out");
+    }, 4000);
+
+    // Move to villain screen after 2.5 seconds
+    setTimeout(() => {
+      Engine.play("Stolen");
+    }, 5000);
+  })();
+  <</script>>
+<</button>>
+
+</div>
+
+
+:: Stolen {"position":"1250,475","size":"100,100"}
+<<run startMatrixRain()>>
+
+<div id="villain-dialogue"></div>
+<div id="unlock-container" style="position: absolute; top: 10px; left: 0; right: 0; text-align: center; z-index: 1000;"></div>
+
+<<script>>
+$(document).one(":passagerender", function () {
+  const messages = [
+    { text: "PASSWORD BREACHED", glitch: true },
+    { text: "MWAHAHAHAHAHAHAHAHAHA", glitch: false },
+    { text: `🎩 "I stole your password: ${State.variables.password} and changed it!"`, glitch: true },
+    { text: "Your password is MINE!", glitch: false },
+    { text: "ERROR 3RROR", glitch: true, isLink: true }
+  ];
+
+  let i = 0;
+
+  function showNextMessage() {
+    if (i >= messages.length) return;
+
+    const msg = messages[i];
+    const el = document.createElement("div");
+
+    // Random position
+    el.style.position = "absolute";
+    el.style.top = `${Math.random() * 70 + 10}%`;
+    el.style.left = `${Math.random() * 70 + 10}%`;
+    el.style.fontSize = "2em";
+    el.style.zIndex = 100;
+    el.className = "villain";
+    el.style.animation = "glitch-fade 0.5s ease-out";
+
+    if (msg.glitch) {
+      el.classList.add("glitch");
+      el.setAttribute("data-text", msg.text);
+    }
+
+    if (msg.text === "MWAHAHAHAHAHAHAHAHAHA") {
+      el.classList.add("typewriter");
+    }
+
+    if (msg.text.includes("Your password is MINE!")) {
+      el.classList.add("fade-scale-in");
+    }
+
+    if (msg.isLink) {
+      el.innerHTML = `[[${msg.text}|BruteForce]]`;
+    } else {
+      el.textContent = msg.text;
+    }
+
+    const container = document.getElementById("villain-dialogue");
+    if (container) container.appendChild(el);
+
+    i++;
+    setTimeout(showNextMessage, 3000);
+  }
+
+  showNextMessage();
+
+  // After 3 minutes, show loading bar at top
+  setTimeout(function () {
+    const container = document.getElementById("unlock-container");
+
+    const barWrapper = document.createElement("div");
+    barWrapper.style.width = "60%";
+    barWrapper.style.height = "25px";
+    barWrapper.style.background = "#222";
+    barWrapper.style.margin = "0 auto";
+    barWrapper.style.borderRadius = "10px";
+    barWrapper.style.overflow = "hidden";
+
+    const bar = document.createElement("div");
+    bar.style.width = "0%";
+    bar.style.height = "100%";
+    bar.style.background = "limegreen";
+    bar.style.transition = "width 3s linear";
+
+    barWrapper.appendChild(bar);
+    container.appendChild(barWrapper);
+
+    // Start loading fill
+    setTimeout(() => {
+      bar.style.width = "100%";
+    }, 100);
+
+    // After loading, show input
+    setTimeout(() => {
+      const inputWrapper = document.createElement("div");
+      inputWrapper.style.marginTop = "10px";
+
+      inputWrapper.innerHTML = `
+        <p style="margin: 10px 0 5px;">Enter 4-digit recovery code: (7496)</p>
+        <input type="text" id="code-input" maxlength="4" style="font-size: 1.2em; padding: 5px;" />
+        <button id="submit-code" style="font-size: 1.2em; padding: 5px;">Unlock</button>
+        <p id="error-msg" style="color: red; margin: 5px;"></p>
+      `;
+      container.appendChild(inputWrapper);
+
+      document.getElementById("submit-code").addEventListener("click", function () {
+        const code = document.getElementById("code-input").value.trim();
+        if (code === "7496") {
+          Engine.play("3"); // Change to your actual passage
+        } else {
+          document.getElementById("error-msg").textContent = "❌ Incorrect code. Try again.";
+        }
+      });
+    }, 3100);
+  }, 10000); // 3 minutes
+});
+<</script>>
+
+
+:: StoryScript [script]
+// In Story JavaScript, wrap in a named function:
+
+$('#ui-bar').remove();
+$(document.head).find('#style-ui-bar').remove();
+window.startMatrixRain = function() {
+  if (document.getElementById("matrix-canvas")) return;
+  (function() {
+  // 1) Create and insert the <canvas> into <body>
+  const canvas = document.createElement("canvas");
+  canvas.id = "matrix-canvas";
+  document.body.appendChild(canvas);
+
+  // 2) Set up context and sizing
+  const ctx = canvas.getContext("2d");
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
+
+  // 3) Choose font size and calculate how many columns fit
+  const fontSize = 16; 
+  const columns = Math.floor(width / fontSize);
+
+  // 4) Create an array (one “drop” per column) that keeps track of y-positions
+  const drops = new Array(columns).fill(1);
+
+  // 5) A string of characters (Japanese katakana + numbers + Latin letters)
+  const characters = 
+    "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピ" +
+    "ウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペ" +
+    "オォコソトノホモヨョロゴゾドボポヴ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  // 6) Draw function: called every interval to update the “rain”
+  function draw() {
+    // a) Fade the canvas slightly (makes trailing effect)
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, width, height);
+
+    // b) Set text color and font
+    ctx.fillStyle = "#ff0000"; 
+    ctx.font = fontSize + "px Courier New";
+
+    // c) For each column, draw a random character at the current y position
+    for (let i = 0; i < columns; i++) {
+      const text = characters.charAt(Math.floor(Math.random() * characters.length));
+      const x = i * fontSize;
+      const y = drops[i] * fontSize;
+      ctx.fillText(text, x, y);
+
+      // If the drop is off the screen and a random threshold is met, reset it
+      if (y > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+
+  // 7) Run draw() every 50 ms
+  setInterval(draw, 50);
+
+  // 8) Handle window resizing (resize canvas & recalc columns/drops)
+  window.addEventListener("resize", function() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    const newCols = Math.floor(width / fontSize);
+    drops.length = newCols;
+    for (let i = 0; i < newCols; i++) {
+      if (drops[i] === undefined) drops[i] = 1;
+    }
+  });
+})();
+};
+
+:: StoryStylesheet [stylesheet]
+/* ────────────────────────────────────────────────────────────── */
+/* GLOBAL STYLES */
+
+/*#ui-bar {
+  display: none;
+}*/
+body {
+  background-color: black;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  margin-left: 3.5em;
+}
+
+#passages {
+  padding: 2em;
+}
+
+/* Links */
+a {
+  color: #00ff00;
+  text-decoration: underline;
+}
+
+/* Buttons and internal links */
+button, .link-internal {
+  background-color: transparent;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  font-family: "Courier New", monospace;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+button:hover, .link-internal:hover {
+  background-color: #00ff00;
+  color: black;
+}
+
+/* Input fields */
+input, textarea {
+  background-color: black;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  font-family: "Courier New", monospace;
+  padding: 0.3em;
+}
+
+input::placeholder {
+  color: #00ff00;
+  opacity: 0.5;
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* TERMINAL-STYLE TYPEWRITER EFFECT */
+
+.typewriter {
+  overflow: hidden;
+  border-right: 0.15em solid #00ff00;
+  white-space: nowrap;
+  animation:
+    typing 3s steps(30, end),
+    blink-caret 0.75s step-end infinite;
+  font-size: 1.2em;
+  width: 0;
+  display: inline-block;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: #00ff00; }
+}
+
+/* Cursor blinking effect */
+.typewriter::after {
+  content: "|";
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* GLITCH EFFECT */
+
+.glitch {
+  position: relative;
+  color: #00ff00;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  background: black;
+  color: #00ff00;
+  pointer-events: none; /* Prevent interaction with pseudo elements */
+}
+
+.glitch::before {
+  clip-path: inset(0 0 50% 0);
+  animation: glitchTop 1s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  clip-path: inset(50% 0 0 0);
+  animation: glitchBottom 1.5s infinite linear alternate-reverse;
+}
+
+@keyframes glitchTop {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, -2px); }
+  40% { transform: translate(2px, 2px); }
+  60% { transform: translate(-1px, 1px); }
+  80% { transform: translate(1px, -1px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitchBottom {
+  0% { transform: translate(0); }
+  20% { transform: translate(1px, 1px); }
+  40% { transform: translate(-1px, -2px); }
+  60% { transform: translate(2px, 1px); }
+  80% { transform: translate(-2px, 2px); }
+  100% { transform: translate(0); }
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* SHAKING EFFECT */
+
+@keyframes shake {
+  0%, 100% { transform: translate(0); }
+  25% { transform: translate(-2px, 2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-1px, 1px); }
+}
+
+.shake {
+  animation: shake 0.3s infinite;
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* FADE-IN EFFECT */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* DRIP DOWN EFFECT */
+
+@keyframes drip {
+  0% { transform: translateY(-100px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.drip {
+  animation: drip 0.8s ease-in;
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* VILLAIN MODE */
+
+/* Main villain container style */
+.villain {
+  color: #ff4d4d !important;
+  background-color: black !important;
+  font-family: "Courier New", monospace;
+  text-shadow: 0 0 8px #ff4d4d !important;
+  border: 2px dashed #ff4d4d;
+  padding: 1em;
+  margin: 1em 0;
+  position: relative; /* For pseudo-elements positioning */
+}
+
+/* Villain mode links inside villain container */
+.villain .link-internal {
+  color: #ff4d4d !important;
+  text-shadow: 0 0 5px #ff4d4d;
+  border-bottom: 1px dashed #ff4d4d;
+}
+
+/* Villain mode typewriter overrides */
+.typewriter.villain {
+  border-right: 0.15em solid #ff4d4d !important;
+  animation:
+    typing 3s steps(30, end),
+    blink-caret-villain 0.75s step-end infinite !important;
+}
+
+@keyframes blink-caret-villain {
+  from, to { border-color: transparent; }
+  50% { border-color: #ff4d4d; }
+}
+
+/* Villain glitch effect overrides */
+.villain.glitch::before,
+.villain.glitch::after {
+  color: #ff4d4d !important;
+  background: black !important;
+  text-shadow: 0 0 8px #ff4d4d !important;
+  animation-name: glitchTopVillain, glitchBottomVillain !important;
+}
+
+@keyframes glitchTopVillain {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, -2px); }
+  40% { transform: translate(2px, 2px); }
+  60% { transform: translate(-1px, 1px); }
+  80% { transform: translate(1px, -1px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitchBottomVillain {
+  0% { transform: translate(0); }
+  20% { transform: translate(1px, 1px); }
+  40% { transform: translate(-1px, -2px); }
+  60% { transform: translate(2px, 1px); }
+  80% { transform: translate(-2px, 2px); }
+  100% { transform: translate(0); }
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* MATRIX CANVAS BACKGROUND */
+
+#matrix-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Behind story content */
+  background-color: black;
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* VILLAIN DIALOGUE CONTAINER */
+
+#villain-dialogue {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/* RED GLITCH VARIANT (optional alternative glitch styling) */
+
+.glitch.red {
+  color: red;
+}
+
+.glitch.red::before,
+.glitch.red::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  background: black;
+  pointer-events: none;
+}
+
+.glitch.red::before {
+  clip-path: inset(0 0 50% 0);
+  animation: glitchTop 1s infinite linear alternate-reverse;
+  color: red;
+  text-shadow: -2px 0 #ff0000;
+  top: -1px;
+  animation-delay: 0.2s;
+}
+
+.glitch.red::after {
+  clip-path: inset(50% 0 0 0);
+  animation: glitchBottom 1.5s infinite linear alternate-reverse;
+  color: red;
+  text-shadow: -2px 0 #ff00ff;
+  top: 1px;
+  animation-delay: 0.4s;
+}
+
+@keyframes fadeScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-scale-in {
+  animation: fadeScaleIn 1s ease forwards;
+}
