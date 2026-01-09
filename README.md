@@ -5,7 +5,8 @@ youShallNotPass! is a TWINE made to teach kids (about grade 4 age) very basic cy
 -
 
 -
-The original version relied on an instructor to teach and walk the kids through it and give them the needed shortcuts/passcodes. If you download and open the .html file in the dev folder, all of the tips and trick are written within the twine.
+*RECOMENDED*
+The original version relied on an instructor to teach and walk the kids through it and give them the needed shortcuts/passcodes. If you download and open the DEBUG_youShallNotPass!.html file in the dev folder, all of the instructions are written within the twine so you don't get lost.
 -
 
 -
